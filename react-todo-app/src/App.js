@@ -1,7 +1,7 @@
 // import logo from "./logo.svg";
 import React, { useState, useEffect } from "react";
-import "./App.css";
 import axios from "axios";
+import AddTodo from "./components/AddTodo";
 
 function App() {
   const [todos, setTodos] = useState([]);
@@ -18,23 +18,56 @@ function App() {
     justifyContent: "center",
   };
 
+  const todoStyle = {
+    padding: "10px 0px",
+    fontFamily: "Arial",
+    fontSize: "16",
+    borderBottom: "1px solid black",
+  };
+
   // AXIOS GET REQUEST
   useEffect(() => {
     axios.get(todosURL).then((res) => {
-      console.table(res.data);
       const allTodos = res.data;
       setTodos(allTodos);
     });
   }, []);
 
+  // AXIOS POST REQUEST
+  const addTodos = (title) => {
+    axios.post(todosURL, { title: title }).then((res) => {
+      setTodos([res.data, ...todos]);
+      setTitle("");
+    });
+  };
+
+  // AXIOS DELETE REQUEST
+  const deleteTodos = (id) => {
+    axios.delete(`https://jsonplaceholder.typicode.com/todos/${id}`);
+    setTodos(
+      todos.filter((todo) => {
+        return todo.id !== id;
+      })
+    );
+  };
+
   return (
     <>
       <header style={headerStyle}>TODO APP</header>
+      <AddTodo onAddTodo={(todoTitle) => addTodos(todoTitle)} />
       <div className="todo-wrapper">
         {todos.map((todo) => {
           return (
             <div key={todo.id}>
-              <div>{todo.title}</div>
+              <div style={todoStyle}>
+                {todo.title}
+                <button
+                  className="delete-btn"
+                  onClick={() => deleteTodos(todo.id)}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           );
         })}
